@@ -1,4 +1,4 @@
-// gist from https://gist.github.com/natergj/62b9d2bfd3e2c6adf87a
+// gist from https://gist.github.com/natergj/62b9d2bfd3e2c6adf87a, but fixed multiple typos
 
 var express = require('express');
 var xl = require('excel4node');
@@ -13,49 +13,91 @@ app.get('/myreport', function(req, res) {
   makeReport(req, res);
 });
 
-var server = app.listen(3000, function () {
-  console.log('Example app listening at http://%s:%s', '127.0.0.1', 3000);
+var server = app.listen(8000, function () {
+  console.log('Example app listening at http://%s:%s', '127.0.0.1', 8000);
 });
 
 function makeReport(req, res){
-	var wb = new xl.Workbook();
-	var ws = wb.addWorksheet('Sheet1');
+  // sample data
+  const data = [{
+    "id": 1,
+    "first_name": "Jeanette",
+    "last_name": "Penddreth",
+    "email": "jpenddreth0@census.gov",
+    "gender": "Female",
+    "ip_address": "26.58.193.2"
+  }, {
+    "id": 2,
+    "first_name": "Giavani",
+    "last_name": "Frediani",
+    "email": "gfrediani1@senate.gov",
+    "gender": "Male",
+    "ip_address": "229.179.4.212"
+  }, {
+    "id": 3,
+    "first_name": "Noell",
+    "last_name": "Bea",
+    "email": "nbea2@imageshack.us",
+    "gender": "Female",
+    "ip_address": "180.66.162.255"
+  }, {
+    "id": 4,
+    "first_name": "Willard",
+    "last_name": "Valek",
+    "email": "wvalek3@vk.com",
+    "gender": "Male",
+    "ip_address": "67.76.188.26"
+  }]
 
-    // ws.cell(1,1).String('String');
-    // Create a reusable style
-var style = wb.createStyle({
+  // set up workbook and worksheets
+	var wb = new xl.Workbook();
+  var ws1 = wb.addWorksheet('Sheet1');
+  var ws2 = wb.addWorksheet('Sheet2');
+
+
+    // Create reusable styles
+  var headingStyle = wb.createStyle({
     font: {
-      color: '#FF0800',
+      rowor: 'black',
+      bold: true,
       size: 12,
     },
-    numberFormat: '$#,##0.00; ($#,##0.00); -',
+  });
+
+  var bodyStyle = wb.createStyle({
+    font: {
+      rowor: '#FF0800',
+      size: 12,
+    },
   });
    
-  // Set value of cell A1 to 100 as a number type styled with paramaters of style
-  ws.cell(1, 1)
-    .number(100)
-    .style(style);
-   
-  // Set value of cell B1 to 200 as a number type styled with paramaters of style
-  ws.cell(1, 2)
-    .number(200)
-    .style(style);
-   
-  // Set value of cell C1 to a formula styled with paramaters of style
-  ws.cell(1, 3)
-    .formula('A1 + B1')
-    .style(style);
-   
-  // Set value of cell A2 to 'string' styled with paramaters of style
-  ws.cell(2, 1)
-    .string('string')
-    .style(style);
-   
-  // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
-  ws.cell(3, 1)
-    .bool(true)
-    .style(style)
-    .style({font: {size: 14}});
+  // Set header rows; cell syntax is cell(row,column)
+  // loop through keys and create a header for each column 
+  // (i offset by 1 to match colums starting at 1)
+  const headers = Object.keys(data[0])
+
+  for (let i=1; i<headers.length+1; i++) {
+    ws1.cell(1, i)
+      .string(headers[i-1])
+      .style(headingStyle);
+  }
+
+
+
+  //  Set values of each cell in each row by looping through data object. 
+  // cell syntax is cell(row,column)
+  for (let row=0; row<data.length; row++) {
+    for (let col=0; col<headers.length; col++) {
+      let header = headers[col]
+      let value = data[row][header]
+        // start at row #2 to be under headers; start at column #1
+        ws1.cell(row+2, col+1)
+          .string(value.toString())
+          .style(bodyStyle)
+    }
+  }
+
+  // set up worksheet 2
 
 	wb.write('MyWorkBook.xlsx', res);
 }
